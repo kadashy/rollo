@@ -1,0 +1,11 @@
+version: '3'
+services:
+  app:
+    container_name: nsr_ormg_expire
+    env_file: local_var.env
+    ports:
+      - "8080:8080"
+    expose:
+      - "8080"
+    build: .
+    command: tail -f /dev/null
