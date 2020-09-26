@@ -8,7 +8,6 @@ stages:
   - publish
   - deploy
 
-
 detect-secrets:
   stage: scan
   image:
@@ -42,13 +41,12 @@ get_scritps:
       - ci
 
 package:
-  image: golang:alpine
+  image: golang:1.14.9-buster
   stage: package
   script:
     - go version
-    - apk add build-base
     - cd src/cmd/
-    - go build -o rollo -ldflags "-linkmode external -extldflags -static" -a main.go
+    - go build main.go
   only:
     - develop
     - test
