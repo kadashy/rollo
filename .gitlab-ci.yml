@@ -47,7 +47,9 @@ package:
   script:
     # - echo $GOPATH
     # - GOPATH=$CI_PROJECT_DIR
-    - go build $CI_PROJECT_DIR/src/cmd/main.go
+    - go mod init rollo
+    - go mod tidy
+    - go build src/cmd/main.go
   tags:
     - k8s-runner
   artifacts:
