@@ -55,7 +55,7 @@ package:
     - master
   artifacts:
     paths:
-      - src/cmd/rollo
+      - src/cmd/main
   tags:
     - k8s-runner
 
