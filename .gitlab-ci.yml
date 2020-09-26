@@ -1,3 +1,14 @@
+
+stages:
+  - package
+  - scan
+  - seting-env
+  - validate-version
+  - build
+  - publish
+  - deploy
+
+
 detect-secrets:
   stage: scan
   image:
