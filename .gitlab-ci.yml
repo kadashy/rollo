@@ -3,6 +3,7 @@ stages:
   - package
   - scan
   - seting-env
+  - validate-version
   - build
   - publish
   - deploy
