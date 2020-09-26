@@ -1,6 +1,6 @@
 FROM alpine:latest
 
 WORKDIR /app
-COPY src/cmd/main .
+COPY main .
 
 ENTRYPOINT ["/app/main"]

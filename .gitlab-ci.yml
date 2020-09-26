@@ -191,7 +191,7 @@ build-dev:
     - PROJECTID=$(cat .projectiddevelop)
     - TAGS_GCP=$(cat .tags_gcp)
     - ls -la
-    - ls -la src/cmd/main
+    - cp src/cmd/main .
     - docker build -t us.gcr.io/${PROJECTID}/"${CI_PROJECT_NAME}":${CI_COMMIT_REF_SLUG}-$VERSION   .
     - GCR_PULL_KEY=$(cat .envdevelop)
     - docker login -u oauth2accesstoken -p $GCR_PULL_KEY us.gcr.io
