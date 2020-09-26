@@ -47,17 +47,15 @@ package:
   script:
     - go version
     - apk add build-base
-    - go mod download
-    - go build -o bin/alpine/rollo -ldflags "-linkmode external -extldflags -static" -a main.go
-    - go build -o bin/linux/rollo  src/cmd/main.go
+    - cd src/cmd/
+    - go build -o rollo -ldflags "-linkmode external -extldflags -static" -a main.go
   only:
     - develop
     - test
     - master
   artifacts:
     paths:
-      - bin/alpine/rollo
-      - bin/linux/rollo
+      - src/cmd/rollo
   tags:
     - k8s-runner
 
