@@ -24,112 +24,6 @@ detect-secrets:
     - test
     - master
 
-# unit-test:
-#   image: registrysecaas.azurecr.io/secaas/maven:3-latest-jdk-11
-#   stage: tests
-#   services:
-#     - docker:18.09.7-dind
-#   script:
-#     - mvn -s settings.nexus.xml -f pom.xml test
-#   except:
-#     - test
-#     - master
-#   tags:
-#     - k8s-runner
-#   artifacts:
-#     paths:
-#       - target
-
-# integration-test:
-#   image: registrysecaas.azurecr.io/secaas/maven:3-latest-jdk-11
-#   stage: tests
-#   services:
-#     - docker:18.09.7-dind
-#   script:
-#     - mvn -s settings.nexus.xml -f pom.xml integration-test
-#   allow_failure: true
-#   only:
-#     - test
-#   tags:
-#     - k8s-runner
-#   artifacts:
-#     paths:
-#       - target
-
-# mutation-test:
-#   image: registrysecaas.azurecr.io/secaas/maven:3-latest-jdk-11
-#   stage: tests
-#   services:
-#     - docker:18.09.7-dind
-#   script:
-#     - mvn -s settings.nexus.xml -f pom.xml clean test org.pitest:pitest-maven:mutationCoverage
-#   allow_failure: true
-#   except:
-#     - test
-#     - master
-#   tags:
-#     - k8s-runner
-
-# coverage:
-#   image: registrysecaas.azurecr.io/secaas/maven:3-latest-jdk-11
-#   stage: scan
-#   script:
-#     - mvn -s settings.nexus.xml -f pom.xml jacoco:report
-#     - ls
-#   except:
-#     - test
-#     - master
-#   tags:
-#     - k8s-runner
-
-# sonar-scan:
-#   stage: scan
-#   image:
-#     name: registrysecaas.azurecr.io/secaas/sonar-scanner-cli:latest
-#     entrypoint: [""]
-#   variables:
-#     GIT_DEPTH: 0
-#   script:
-#     - $CI_PROJECT_DIR/pipeline/ci/executescan.sh ${CI_PROJECT_NAME} ${SONAR_URL} ${SONAR_LOGIN} >> .outputscan.log
-#     - cat .outputscan.log
-#   except:
-#     - test
-#     - master
-#   tags:
-#     - k8s-runner
-#   artifacts:
-#     paths:
-#       - .outputscan.log
-
-# sonar-check:
-#   stage: sonar-check
-#   image:
-#     name: registrysecaas.azurecr.io/secaas/sonar-scanner-cli:latest
-#   script:
-#     - $CI_PROJECT_DIR/pipeline/ci/reviewsonar.sh ${CI_PROJECT_NAME} ${SONAR_URL} ${USER_SONAR} ${PASS_SONAR}
-#   except:
-#     - test
-#     - master
-#   tags:
-#     - k8s-runner
-
-# tag:
-#   image: registrysecaas.azurecr.io/secaas/maven:3-latest-jdk-11
-#   stage: package
-#   script:
-#     - BUILD_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout) || status=1
-#     - echo $BUILD_VERSION > .version
-#     - cat .version
-#   only:
-#     - develop
-#     - test
-#     - master
-#   tags:
-#     - k8s-runner
-#   artifacts:
-#     paths:
-#       - .version
-
 get_scritps:
   image: alpine
   stage: package
@@ -153,7 +47,7 @@ package:
   script:
     - echo $GOPATH
     - GOPATH=$CI_PROJECT_DIR
-    - go build $CI_PROJECT_DIR/src/main.go
+    - go build $CI_PROJECT_DIR/src/cmd/main.go
   tags:
     - k8s-runner
   artifacts:
@@ -161,24 +55,6 @@ package:
     name: ${CI_COMMIT_REF_SLUG}
     paths:
       - $CI_PROJECT_DIR/main
-
-# dependency-check-analysis:
-#   stage: scan
-#   image: registrysecaas.azurecr.io/secaas/dependency-check:v-3.2-5.3.0
-#   services: []
-#   variables:
-#     CI_JOB: 'true'
-#     DC_TARGET_LANG: 'java'
-#     PROJECT_NAME: '$CI_PROJECT_NAME'
-#     DC_PROJECT_NAME: '$CI_PROJECT_NAME'
-#     BUSINESS_NAME: '$BUSINESS'
-#   script:
-#     - entrypoint.sh dependency-cli
-#   tags:
-#     - dependencyCheck
-#   except:
-#     - test
-#     - master
 
 credentials-dev:
   image: registrysecaas.azurecr.io/secaas/gcp-sdk:latest
@@ -320,68 +196,9 @@ build-dev:
   allow_failure: true
   only:
     - develop
+    - test
   tags:
     - k8s-runner
-
-# clair:
-#   stage: clair
-#   image: "registrysecaas.azurecr.io/secaas/clair-tool:latest"
-#   services: []
-#   variables:
-#     CLAIR_URL: "http://clair-secaas.buffetcloud.io:6060"
-#     REGISTRY_USER: oauth2accesstoken
-#   script:
-#     - VERSION=$(cat .version)
-#     - PROJECTID=$(cat .projectid${CI_COMMIT_REF_SLUG})
-#     - export REGISTRY_PASSWORD=$(cat .env${CI_COMMIT_REF_SLUG})
-#     - ARTIFACT=us.gcr.io/"${PROJECTID}"/"${CI_PROJECT_NAME}":${CI_COMMIT_REF_SLUG}-$VERSION
-#     - echo $ARTIFACT
-#     - SCAN_IMAGE=$ARTIFACT clair-tool
-#   only:
-#     - develop
-#     - test
-#     - master
-#   tags:
-#     - k8s-runner
-
-# publish:
-#   image: docker:stable-dind
-#   stage: publish
-#   services:
-#     - docker:18.09.7-dind
-#   script:
-#     - mkdir ~/.docker
-#     - echo $DOCKER_AUTH_CONFIG >> ~/.docker/config.json
-#     - VERSION=$(cat .version)
-#     - GCR_PULL_KEY_DEV=$(cat .envdevelop)
-#     - PROJECTID_DEV=$(cat .projectiddevelop)
-#     - docker login -u oauth2accesstoken -p $GCR_PULL_KEY_DEV us.gcr.io
-#     - docker pull us.gcr.io/$PROJECTID_DEV/"${CI_PROJECT_NAME}":${CI_COMMIT_REF_SLUG}-$VERSION
-#     - docker tag us.gcr.io/$PROJECTID_DEV/"${CI_PROJECT_NAME}":${CI_COMMIT_REF_SLUG}-$VERSION   us.gcr.io/$PROJECTID_DEV/"${CI_PROJECT_NAME}":${CI_COMMIT_REF_SLUG}-$VERSION
-#     - docker push us.gcr.io/$PROJECTID_DEV/"${CI_PROJECT_NAME}":${CI_COMMIT_REF_SLUG}-$VERSION
-#   allow_failure: true
-#   only:
-#     - test
-#     - master
-#   tags:
-#     - k8s-runner
-
-# clean-tmp:
-#   image: registrysecaas.azurecr.io/secaas/gcp-sdk:latest
-#   stage: clean
-#   script:
-#     - OWNER=$(cat pipeline/ci/.owner)
-#     - VERSION=$(cat .version)
-#     - PROJECTID=$(cat .projectid${CI_COMMIT_REF_SLUG})
-#     - NSR_GCR_AUTH_OWNED=NSR_GCR_AUTH_${OWNER}_${CI_COMMIT_REF_SLUG}
-#     - echo ${!NSR_GCR_AUTH_OWNED} | base64 -d > gcr_auth.json
-#     - gcloud auth activate-service-account --key-file=gcr_auth.json
-#     - gcloud container images delete us.gcr.io/$PROJECTID/"${CI_PROJECT_NAME}":${CI_COMMIT_REF_SLUG}-$VERSION   --force-delete-tags --quiet
-#   allow_failure: true
-#   only:
-#     - develop
-#   tags:
-#     - k8s-runner
 
 build-test:
   image: docker:stable-dind
