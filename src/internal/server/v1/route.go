@@ -9,7 +9,7 @@ import (
 func SetupRoutes(app *fiber.App) {
 
 	//TBD
-	app.Get("/api/v1/costTravel", direction.GetDirections)
-	app.Get("/api/v1/costTravels", direction.GetDirectionMultiple)
+	app.Post("/api/v1/costTravel", direction.GetDirections)
+	app.Post("/api/v1/costTravels", direction.GetDirectionMultiple)
 
 }

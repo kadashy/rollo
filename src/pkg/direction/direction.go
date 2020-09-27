@@ -3,7 +3,6 @@ package direction
 import (
 	"context"
 	"log"
-	"os"
 	"rollo/pkg/response"
 	"time"
 
@@ -22,7 +21,8 @@ type MapDirection struct {
 func GetDirections(c *fiber.Ctx) {
 	var mapRespon response.DirectionResponse
 
-	apikey := os.Getenv("APYKEY")
+	//apikey := os.Getenv("APYKEY")
+	apikey := "AIzaSyBMhy5POh_I-joxZnOSTUHU_43D8bjhCeY"
 
 	mapRequest := new(MapDirection)
 	if err := c.BodyParser(mapRequest); err != nil {
@@ -84,7 +84,8 @@ func GetDirectionMultiple(c *fiber.Ctx) {
 
 func GetMapsDirection(mapRequest MapDirection) response.DirectionResponse {
 	var response response.DirectionResponse
-	apikey := os.Getenv("APYKEY")
+	//apikey := os.Getenv("APYKEY")
+	apikey := "AIzaSyBMhy5POh_I-joxZnOSTUHU_43D8bjhCeY"
 
 	start := time.Now()
 	log.Println("Start time: ", start)
