@@ -6,7 +6,7 @@ import (
 	"rollo/pkg/response"
 	"time"
 
-	"github.com/gofiber/fiber"
+	"github.com/gofiber/fiber/v2"
 	"googlemaps.github.io/maps"
 )
 
@@ -18,7 +18,7 @@ type MapDirection struct {
 	PointId       string    `json:"pointID"`
 }
 
-func GetDirections(c *fiber.Ctx) {
+func GetDirections(c *fiber.Ctx) error {
 	var mapRespon response.DirectionResponse
 
 	//apikey := os.Getenv("APYKEY")
@@ -26,8 +26,8 @@ func GetDirections(c *fiber.Ctx) {
 
 	mapRequest := new(MapDirection)
 	if err := c.BodyParser(mapRequest); err != nil {
-		c.Status(503).Send(err)
-		return
+		c.Status(503)
+		return err
 	}
 
 	start := time.Now()
@@ -44,7 +44,7 @@ func GetDirections(c *fiber.Ctx) {
 	}
 	route, _, err := ma.Directions(context.Background(), r)
 	if err != nil {
-		c.Status(409).Send("fatal error 1: %s", err)
+		c.Status(409)
 	}
 
 	t := time.Now()
@@ -60,18 +60,18 @@ func GetDirections(c *fiber.Ctx) {
 		}
 	}
 
-	c.JSON(mapRespon)
+	return c.JSON(mapRespon)
 }
 
-func GetDirectionMultiple(c *fiber.Ctx) {
+func GetDirectionMultiple(c *fiber.Ctx) error {
 	var mapRequest []MapDirection
 	var mapResponse []response.DirectionResponse
 	var mapRespon response.DirectionResponse
 
 	err := c.BodyParser(&mapRequest)
 	if err != nil {
-		c.Status(503).Send(err)
-		return
+		c.Status(503)
+		return err
 	}
 
 	for _, marReq := range mapRequest {
@@ -79,7 +79,7 @@ func GetDirectionMultiple(c *fiber.Ctx) {
 		mapResponse = append(mapResponse, mapRespon)
 	}
 
-	c.JSON(mapResponse)
+	return c.JSON(mapResponse)
 }
 
 func GetMapsDirection(mapRequest MapDirection) response.DirectionResponse {
